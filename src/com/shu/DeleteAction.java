@@ -50,7 +50,11 @@ public class DeleteAction extends WriteCommandAction.Simple {
         bindToChange.clear();
         for (int i = 0; i < lines.length; i++) {
             String text = lines[i];
-            if (text.contains("ButterKnife.bind(")) {
+            String pack = lines[i].replaceAll("\\s", "");
+
+            if (pack.contains("ButterKnife.bind(this)")) {
+                bindToChange.put(i, text.replace("ButterKnife.", "").replace("this", ""));
+            } else if (text.contains("ButterKnife.bind(")) {
                 bindToChange.put(i, text.replace("ButterKnife.", ""));
             }
             if (text.contains("bind(") && !text.contains("void bind(")) {
@@ -66,12 +70,16 @@ public class DeleteAction extends WriteCommandAction.Simple {
             "import butterknife.ButterKnife;",
             "import butterknife.BindView;"};
 
+    boolean foundButterKnifeImport = false;
 
     private void deleteImport() {
         for (int lineNum = 0; lineNum < lines.length; lineNum++) {
             if (lines[lineNum].equals(butterKnifeImports[0]) || lines[lineNum].equals(butterKnifeImports[1]) || lines[lineNum].equals(butterKnifeImports[2]) || lines[lineNum]
                     .equals(butterKnifeImports[3])) {
                 linesToDelete.add(lineNum);
+            }
+            if (lines[lineNum].trim().startsWith("import butterknife")) {
+                foundButterKnifeImport = true;
             }
         }
     }
@@ -154,6 +162,9 @@ public class DeleteAction extends WriteCommandAction.Simple {
         try {
             deleteImport();
 
+            if (!foundButterKnifeImport) {
+                return;
+            }
             //scan annotations
             scanButterKnifeBindMethod();
             scanBindViewsSingleLineCase();

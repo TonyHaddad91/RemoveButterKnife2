@@ -49,7 +49,17 @@ class FindViewByIdWriter extends WriteCommandAction.Simple {
             "if(findViewById(" + $_ID + ") != null){" +
                     "findViewById(" + $_ID + ").set" + $_EVENT + "Listener(new View." + $_EVENT + "Listener() {" +
                     "                @Override" +
-                    "                public void " + $_EVENT + "() {" +
+                    "                public void " + $_EVENT + "(View view) {" +
+                    "                    " + $_METHOD_CALL + ";" +
+                    "                }" +
+                    "            });" +
+                    "        }\n";
+
+    final private static String TMP_View_Click =
+            "if(findViewById(" + $_ID + ") != null){" +
+                    "findViewById(" + $_ID + ").set" + $_EVENT + "Listener(new View." + $_EVENT + "Listener() {" +
+                    "                @Override" +
+                    "                public void onClick(View view) {" +
                     "                    " + $_METHOD_CALL + ";" +
                     "                }" +
                     "            });" +
@@ -99,17 +109,16 @@ class FindViewByIdWriter extends WriteCommandAction.Simple {
                 boolean withsuper = anyMethods.length > bindMethods.length;
                 PsiMethod bindMethod = (withsuper) ?
                         mFactory.createMethodFromText
-                                ("@Override protected void bind(Activity activity){super.bind(activity);}",
+                                ("@Override protected void bind(){super.bind();}",
                                         mClass) :
                         mFactory.createMethodFromText
-                                ("protected void bind(Activity activity){}",
+                                ("protected void bind(){}",
                                         mClass);
                 if (withsuper) {
                     this.noButterKnifeBindMethodFoundInClassAndFoundNoBindMethodCaller = false;
                 }
                 appendBindMethod(bindMethod, mClass);
-                mClass.addBefore(bindMethod, mClass.getLastChild());
-
+                mClass.addBefore(bindMethod, mClass.getRBrace());
 
             } else {
                 appendBindMethod(bindMethods[0], mClass);
@@ -180,6 +189,9 @@ class FindViewByIdWriter extends WriteCommandAction.Simple {
 
                 bind.getBody().add(block);
 
+            } else if (tag.equals("OnClick")) {
+                bind.getBody().add(mFactory.createStatementFromText(generateCode(TMP_View_Click, idTag),
+                        mClass));
             } else {
                 bind.getBody().addAfter(mFactory.createCommentFromText("/* " + generateCode(TMP_View, idTag) +
                                 " */",
