@@ -33,12 +33,7 @@ class FindViewByIdWriter extends WriteCommandAction.Simple {
 
     final private static String TMP_OnClick =
             "if(" + $_FIELDNAME + " != null){" +
-                    $_FIELDNAME + ".setOnClickListener(new View.OnClickListener () {" +
-                    "            @Override" +
-                    "            public void onClick(View view) {" +
-                    "                " + $_METHOD_CALL + ";" +
-                    "            }" +
-                    "        });}\n";
+                    $_FIELDNAME + ".setOnClickListener(view ->" + $_METHOD_CALL + ");\n}";
 
     final private static String TMP_Unknow =
             "TODO: if(" + $_FIELDNAME + " != null){" +
