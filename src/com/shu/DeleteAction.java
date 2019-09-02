@@ -68,6 +68,7 @@ public class DeleteAction extends WriteCommandAction.Simple {
             "import butterknife.Bind;",
             "import butterknife.InjectView;",
             "import butterknife.ButterKnife;",
+            "import butterknife.OnClick;",
             "import butterknife.BindView;"};
 
     boolean foundButterKnifeImport = false;
